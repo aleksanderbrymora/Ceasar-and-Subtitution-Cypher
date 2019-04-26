@@ -503,7 +503,7 @@ void substitutionDecryption() {
     char subString[arraySize]; //array used to hold substitution string
     i = 0; //counter
     int length = 0; //Used to store array size
-    int reInput = 0; //Used to tell if subString is wrong
+    int reInput = 0; //Used if subString is wrong
 
     do {
         //Zeroing the array
