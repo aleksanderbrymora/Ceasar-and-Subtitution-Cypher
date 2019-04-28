@@ -778,6 +778,14 @@ void substitutionDecryption() {
  * then it compares all the options with a dictionary file and gives each
  * try a score based on matching consecutive characters (2 or more)
  * Then it outputs the most probable message (the one with the highest score)
+ *
+ * I intentionally left blocks of code and comments to them because they
+ * would be better options, certainly a bit faster. I just ran out of time
+ * and figured it is good to show previous work. Left code does not interrupt
+ * how the program works as it is commented out
+ *
+ * it requires:
+ *      user input into a input.txt file of a message to decrypt
  */
 
 void bruteRotationDecryption() {
