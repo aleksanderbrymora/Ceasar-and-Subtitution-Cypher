@@ -797,8 +797,6 @@ void bruteRotationDecryption() {
     char bruteArray[arraySize]; //array used to store brute decryption
     char dict[big_arraySize]; //array used to store top100 words
     int dictWord[arraySize]; //array to store lengths of words in an dictionary file
-    int messageWord[arraySize]; //array to store lengths of words in a message file
-    int messageScore[30]; //array used to store score that the message gets
     char finalDecryption[arraySize]; //array used to hold the most probable message
     int length = 0;
     int score = 0;
