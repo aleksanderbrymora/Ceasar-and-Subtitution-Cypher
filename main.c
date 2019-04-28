@@ -33,14 +33,11 @@ void bruteRotationDecryption();
 
 //Function used to exit main menu
 int exitLoop();
-//--------------------------------------------------
 
 
 //----Global Variables------------------------------
-
 int userChoice = 0; //used to store user choices
 int i = 0;  //used for loops and counting
-//--------------------------------------------------
 
 //Main menu
 int main() {
@@ -201,9 +198,11 @@ void rotationEncryption() {
 
     //----Outputting encoded message to file--------
     fprintf(output, "Encrypted message: \n");
+    printf("Encrypted message: \n"); //and to the terminal
     for (i = 0; i < length; i++){
         if (charArray[i] >= 32 && charArray[i] <= 127) {
             fprintf(output, "%c", charArray[i]);
+            printf("%c", charArray[i]);
         }
     }
 
@@ -211,7 +210,7 @@ void rotationEncryption() {
     fclose(input);
     fclose(output);
 
-    printf("Check output.txt for encrypted message\n");
+    printf("\nCheck output.txt for encrypted message\n");
     printf("--------------------------------------\n");
 }
 
@@ -313,9 +312,11 @@ void rotationDecryption() {
 
     //----Outputting encoded message to file--------
     fprintf(output, "Decrypted message: \n");
+    printf("Decrypted message: \n");
     for (i = 0; i < length; i++){
         if (charArray[i] >= 32 && charArray[i] <= 127) {
             fprintf(output, "%c", charArray[i]);
+            printf("%c", charArray[i]);
         }
     }
 
@@ -323,7 +324,7 @@ void rotationDecryption() {
     fclose(input);
     fclose(output);
 
-    printf("Check output.txt for encrypted message\n");
+    printf("\nCheck output.txt for encrypted message\n");
     printf("--------------------------------------\n\n");
 }
 
@@ -503,9 +504,11 @@ void substitutionEncryption() {
         if (charArray[i] > 0 && charArray[i] < 127) {
             if (charArray[i] >= 65 && charArray[i] <= 90) {
                 fprintf(output, "%c", subString[charArray[i] - 65]);
+                printf("%c", subString[charArray[i] - 65]);
             }
             else {
                 fprintf(output, "%c", charArray[i]);
+                printf("%c", charArray[i]);
             }
         }
     }
@@ -699,9 +702,11 @@ void substitutionDecryption() {
         if (charArray[i] > 0 && charArray[i] < 127) {
             if (charArray[i] >= 65 && charArray[i] <= 90) {
                 fprintf(output, "%c", subString[charArray[i] - 65]);
+                printf("%c", subString[charArray[i] - 65]);
             }
             else {
                 fprintf(output, "%c", charArray[i]);
+                printf("%c", charArray[i]);
             }
         }
     }
@@ -721,26 +726,44 @@ void bruteRotationDecryption() {
     FILE *dictionary;
     input = fopen("input.txt", "r");
     output = fopen("output.txt", "w");
-    dictionary = fopen("100.txt", "r");
+    dictionary = fopen("20k.txt", "r");
 
 
     //----Setting up variables----------------------
     int arraySize = 1024; //Size of array
+    int big_arraySize = 200000;
     char charArray[arraySize]; //array used to hold a message
     char bruteArray[arraySize]; //array used to store brute decryption
-    char dict[arraySize]; //array used to store top100 words
+    char dict[big_arraySize]; //array used to store top100 words
     int dictWord[arraySize]; //array to store lengths of words in an dictionary file
     int messageWord[arraySize]; //array to store lengths of words in a message file
+    int messageScore[30]; //array used to store score that the message gets
+    char finalDecryption[arraySize]; //array used to hold the most probable message
     int length = 0;
+    int score = 0;
+    int previousScore = 0;
+    int bestKey = 0;
     i = 0; //counter
 
     //Zeroing all the arrays
     for (i = 0; i <= arraySize; i++) {
         charArray[i] = 0;
         bruteArray[i] = 0;
-        dict[i] = 0;
         dictWord[i] = 0;
     }
+
+    for (i = 0; i <= big_arraySize; i++) {
+        dict[i] = 0;
+    }
+
+    printf("Input message to decrypt into input.txt\n");
+    printf("This process may take few seconds...\n");
+    printf("When you ready press any character and press enter: ");
+    char anyKey;
+    //i seriously have no idea why i have to put 2 of these here
+    //but that is the only way it works the way i want it to...
+    scanf("%c", &anyKey);
+    scanf("%c", &anyKey);
 
     //----Checking if dictionary file exists--------
     if (dictionary == NULL) {
@@ -786,15 +809,16 @@ void bruteRotationDecryption() {
      */
 
     // inputting every character from file into an array
-    for (i = 0; i < arraySize; i++) {
+    for (i = 0; i < big_arraySize; i++) {
         fscanf(dictionary, "%1c", &dict[i]);
     }
 
     //----Making every character upper case---------
-    for (i = 0; i < arraySize; i++) {
+    for (i = 0; i < big_arraySize; i++) {
         dict[i] = toupper(dict[i]);
     }
 
+    /*
     //Counting the lengths of a word in a top100 dictionary
     int wordPlace = 0;
     length = 0;
@@ -809,6 +833,7 @@ void bruteRotationDecryption() {
             length = 0;
         }
     }
+     */
 
     //----From file to array------------------------
     /*
@@ -830,15 +855,20 @@ void bruteRotationDecryption() {
 
 
     //----Counting word lengths in a message--------
+    /*
+     * out of this function we are getting an array
+     * of lengths of words
+     * If we get a 0 it means there are more than one
+     * signs different than capital letters, example: ". "
+     */
+    /*
     wordPlace = 0;
+    length = 0;
     for (i = 0; i < arraySize; i++) {
         if (charArray[i] >= 0 && charArray[i] <= 127) {
             if (charArray[i] >= 65 && charArray[i] <= 90) {
                 length++;
             }
-            //We are checking with this if there is a letter in a "future"
-            //if there is no letter then we shouldn't start counting lengths of words in a message
-            else if (charArray[i + 1] >= 65 && charArray[i + 1] <= 90) {}
             else {
                 messageWord[wordPlace] = length;
                 wordPlace++;
@@ -846,13 +876,7 @@ void bruteRotationDecryption() {
             }
         }
     }
-
-
-    /*
-    for (i = 0; i <= 10; i++) {
-        printf("%d. %d\n", i + 1, messageWord[i]);
-    }
-    */
+     */
 
     //----Bruteforce decryption---------------------
     /*
@@ -869,15 +893,14 @@ void bruteRotationDecryption() {
      * 5. Zero the array holding the brute forced decryption
      */
 
-
     //----Counting characters in a string-----------
     for (length = 0; charArray[length] != '\0'; length++) {}
 
     //loop to try all characters (hence the 26)
-    for (i = 0; i < 26; i++) {
-        fprintf(output, "----------------------------\n");
-        fprintf(output, "Key: %d\n", i);
-        fprintf(output, "Brutforce-decrypted message:\n");
+    for (i = 1; i < 26; i++) {
+        //fprintf(output, "----------------------------\n");
+        //fprintf(output, "Key: %d\n", i);
+        //fprintf(output, "Brutforce-decrypted message:\n");
 
         for (int counter = 0; counter <= length; counter++) {
             //ignoring all other garbage that may be there
@@ -894,18 +917,132 @@ void bruteRotationDecryption() {
                     //them by 26 to again become letters
                     if (bruteArray[counter] > 90) {
                         bruteArray[counter] = bruteArray[counter] - 26;
-                        fprintf(output, "%c", bruteArray[counter]);
+                        //fprintf(output, "%c", bruteArray[counter]);
                     } else {
-                        fprintf(output, "%c", bruteArray[counter]);
+                        //fprintf(output, "%c", bruteArray[counter]);
                     }
                 }
                 else {
-                    fprintf(output, "%c", charArray[counter]);
+                    bruteArray[counter] = charArray[counter];
                 }
             }
         }
-        fprintf(output, "\n");
+
+        //----Dictionary comparison---------------------
+
+        /*
+         * all this mess with the lengths of words is not worth it with
+         * dictionary this size, but if i chose to compare to a bigger
+         * one it would optimize a tiny bit the program because it makes
+         * sure it compares to words that are the same length only
+         * (at least in theory...)
+         *
+         * i might get back to that...
+         */
+
+        /*
+        int letterMatch = 0; //a temporary variable to store current length of a word
+        int match = 0;
+        //counter to cycle through lengths of words
+        for (i = 0; i < arraySize; i++) {
+            //making sure we are not checking punctuation for a match
+            if (messageWord[i] != 0) {
+                //cycling through arrays storing lengths of the words for a match
+                for (int counter = 0; counter < arraySize; counter++) {
+                    //if there is a match in lengths im starting the
+                    //counter to cycle comparison in letters
+                    if (messageWord[i] == dictWord[counter]) {
+                        //cycling through letters in matching words
+                        for (int anotherCounter = 0; anotherCounter <= messageWord[counter]; anotherCounter++) {
+                            //Here im comparing
+                            if (charArray[anotherCounter] == dictWord[anotherCounter]){
+                                letterMatch++;
+                            }
+                            else {
+                                letterMatch = 0;
+                            }
+                            if (letterMatch > 0) {
+                                match++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+         */
+
+        /*
+         * this approach is much easier as all it does is cycles through
+         * letters in the dictionary comparing it to one letter in the
+         * message.
+         * if it finds a match it compares a letter after it to the matched
+         * word in dictionary
+         * if its a miss it moves on to looking again for another matching word
+         * to repeat the algorithm
+         * if it does match the next word it compares to the letter after that
+         * if that's a match i increase the score for that sentence
+         * the highest score will be the most probable sentence to be real
+         */
+
+
+        score = 0;
+        for (int ii = 0; ii < length; ii++) {
+            for (int counter = 0; counter < big_arraySize; counter++) {
+                if (bruteArray[ii] == dict[counter] && bruteArray[ii + 1] == dict[counter + 1] && bruteArray[ii + 2] == dict[counter + 2]) {
+                    score++;
+                    ii++;
+                    counter = 0;
+                }
+            }
+        }
+
+
+        //fprintf(output, "\nScore: %d\n", score);
+
+
+        if (score >= previousScore) {
+            previousScore = score;
+            bestKey = i;
+        }
+
     }
+
+    fprintf(output, "Best Key: %d\nScore: %d\n", bestKey, previousScore);
+    printf("\nBest Key: %d\nScore: %d\n", bestKey, previousScore);
+
+
+    for (int counter = 0; counter <= length; counter++) {
+        //ignoring all other garbage that may be there
+        if (charArray[counter] >= 0 && charArray[counter] <= 127) {
+
+            //Increasing array (that stores an encrypted message)
+            //by 1 every loop
+            finalDecryption[counter] = charArray[counter] + bestKey;
+
+            //Decrypting only capital letters
+            if (charArray[counter] >= 65 && charArray[counter] <= 90) {
+
+                //Letters may go over 90 so we decrease
+                //them by 26 to again become letters
+                if (finalDecryption[counter] > 90) {
+                    finalDecryption[counter] = finalDecryption[counter] - 26;
+                }
+            }
+            else {
+                finalDecryption[counter] = charArray[counter];
+            }
+        }
+    }
+
+
+    for (i = 0; i < length; i++) {
+        if (finalDecryption[i] >= 0 && finalDecryption[i] <= 127) {
+            fprintf(output, "%c", finalDecryption[i]);
+            printf("%c", finalDecryption[i]);
+        }
+    }
+    printf("\n\nCheck out output.txt for the most probable decryption of a message\n");
+
 
 }
 
