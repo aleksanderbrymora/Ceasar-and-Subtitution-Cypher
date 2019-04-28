@@ -2,17 +2,24 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-//TODO Make program output to the terminal too
-//TODO A large block comment should be at the top of your code which describes the high-level operation of
-//the program. It should also include any user-interface notes (eg: how should the demonstrator choose
-//between encryption and decryption?)
-//TODO Every function needs to be documented in a block comment above the function definition:
-//– What are the inputs?
-//– What is the return value?
-//– What does the function do?
-//– Are there limitations to the function? Must strings be less than a certain length? Are there data
-//type restrictions? etc.
-//TODO Program flow control needs to be briefly described.
+/*
+ * ----OVERVIEW----
+ * Program is divided in 5 sections:
+ *      Rotation encryption
+ *      Rotation decryption
+ *      Substitution encryption
+ *      Substitution decryption
+ *      Rotation decryption
+ *
+ * You choose which option you want to use with numbers
+ *
+ * Program is used to either encrypt or decrypt given message
+ * using different data needed from the user which he either
+ * inputs into txt files (which he is instructed to) or terminal.
+ *
+ * User message to either encrypt or decrypt is restricted to 1024 characters
+ * however its easy to change as it is set in a variable called arraySize.
+ */
 
 //----Function prototypes---------------------------
 
@@ -39,7 +46,13 @@ int exitLoop();
 int userChoice = 0; //used to store user choices
 int i = 0;  //used for loops and counting
 
-//Main menu
+/*
+ * main function only holds the menu to open other functions
+ *
+ * It requires:
+ *      User input into the terminal
+ */
+
 int main() {
     printf("------------------------------------------------\n");
     printf("This program accepts inputs only from txt\n");
@@ -53,7 +66,7 @@ int main() {
         printf("(2) Rotation Decryption\n");
         printf("(3) Substitution Encryption\n");
         printf("(4) Substitution Decryption\n");
-        printf("(5) Brutforce Rotation Decryption\n");
+        printf("(5) Rotation Decryption\n");
         printf("Input number: ");
         scanf("%d", &userChoice);
         while (userChoice < 1 && userChoice > 5) {
@@ -91,9 +104,9 @@ int main() {
                 userChoice = exitLoop();
                 break;
             case 5 :
-                printf("------------------------------------------------\n");
-                printf("----You chose Bruteforce rotation Decryption----\n");
-                printf("------------------------------------------------\n");
+                printf("-------------------------------------\n");
+                printf("----You chose Rotation Decryption----\n");
+                printf("-------------------------------------\n");
                 bruteRotationDecryption();
                 userChoice = exitLoop();
                 break;
@@ -106,6 +119,15 @@ int main() {
     printf("Thanks for using the program!\n" );
     printf("---------------------------\n");
 }
+
+/*
+ * rotationEncryption function is used to encrypt a message by shifting
+ * characters by given key
+ *
+ * It requires:
+ *     User inputting key into the terminal
+ *     User inputting message into input.txt
+ */
 
 void rotationEncryption() {
     //----Setting up file IO------------------------
@@ -213,6 +235,14 @@ void rotationEncryption() {
     printf("\nCheck output.txt for encrypted message\n");
     printf("--------------------------------------\n");
 }
+
+/*
+ * rotationDecryption function is used to decrypt a message by shifting
+ * characters by a given key
+ * It requires:
+ *     User inputting the key into the terminal
+ *     User inputting message into input.txt
+ */
 
 void rotationDecryption() {
     //----Setting up file IO------------------------
@@ -327,6 +357,17 @@ void rotationDecryption() {
     printf("\nCheck output.txt for encrypted message\n");
     printf("--------------------------------------\n\n");
 }
+
+/*
+ * substitutionEncryption function is used to encrypt user's message
+ * with provided string of shuffled characters from the alphabet which
+ * do not repeat. Then it replaces first character in alphabet with a
+ * first character in the substitution string
+ *
+ * it requires:
+ *      user input into a input.txt file of a message to encrypt
+ *      user input into a subString.txt of a substitution string
+ */
 
 void substitutionEncryption() {
     //----Setting up file IO------------------------
@@ -520,6 +561,17 @@ void substitutionEncryption() {
     fclose(output);
     fclose(substitutionString);
 }
+
+/*
+ * substitutionDecryption function is used to decrypt user's message
+ * with provided string of shuffled characters from the alphabet which
+ * do not repeat. Then it replaces first character in alphabet with a
+ * first character in the substitution string
+ *
+ * it requires:
+ *      user input into a input.txt file of a message to decrypt
+ *      user input into a subString.txt of a substitution string
+ */
 
 void substitutionDecryption() {
     /*
@@ -718,6 +770,15 @@ void substitutionDecryption() {
     fclose(output);
     fclose(substitutionString);
 }
+
+/*
+ * bruteRotationDecryption function is used to decrypt a message encrypted
+ * with a rotation encryption.
+ * first it tries all the possibilities of a decrypted message
+ * then it compares all the options with a dictionary file and gives each
+ * try a score based on matching consecutive characters (2 or more)
+ * Then it outputs the most probable message (the one with the highest score)
+ */
 
 void bruteRotationDecryption() {
     //----Setting up file IO------------------------
