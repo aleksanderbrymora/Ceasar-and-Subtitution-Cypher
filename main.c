@@ -2,6 +2,18 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+//TODO Make program output to the terminal too
+//TODO A large block comment should be at the top of your code which describes the high-level operation of
+//the program. It should also include any user-interface notes (eg: how should the demonstrator choose
+//between encryption and decryption?)
+//TODO Every function needs to be documented in a block comment above the function definition:
+//– What are the inputs?
+//– What is the return value?
+//– What does the function do?
+//– Are there limitations to the function? Must strings be less than a certain length? Are there data
+//type restrictions? etc.
+//TODO Program flow control needs to be briefly described.
+
 //----Function prototypes---------------------------
 
 //Function used to encrypt given message using rotation encryption
@@ -15,6 +27,9 @@ void substitutionEncryption();
 
 //Function used to decrypt given message using substitution decryption
 void substitutionDecryption();
+
+//Function used to decrypt rotation cypher by bruteforce
+void bruteRotationDecryption();
 
 //Function used to exit main menu
 int exitLoop();
@@ -41,9 +56,10 @@ int main() {
         printf("(2) Rotation Decryption\n");
         printf("(3) Substitution Encryption\n");
         printf("(4) Substitution Decryption\n");
+        printf("(5) Brutforce Rotation Decryption\n");
         printf("Input number: ");
         scanf("%d", &userChoice);
-        while (userChoice < 1 && userChoice > 4) {
+        while (userChoice < 1 && userChoice > 5) {
             printf("That is an invalid input\n");
             printf("Input must be between 1 and 4: ");
             scanf("%d", &userChoice);
@@ -77,7 +93,13 @@ int main() {
                 substitutionDecryption();
                 userChoice = exitLoop();
                 break;
-
+            case 5 :
+                printf("------------------------------------------------\n");
+                printf("----You chose Bruteforce rotation Decryption----\n");
+                printf("------------------------------------------------\n");
+                bruteRotationDecryption();
+                userChoice = exitLoop();
+                break;
             case 9 :
                 break;
             default :
@@ -123,8 +145,13 @@ void rotationEncryption() {
         for (; key > 25; key -= 26) {}
     }
 
-    //----Printing the key--------------------------
-    fprintf(output, "Key is: %d\n", key);
+    printf("Input message to encrypt to input.txt\n");
+    printf("When you ready press any character and press enter: ");
+    char anyKey;
+    //i seriously have no idea why i have to put 2 of these here
+    //but that is the only way it works the way i want it to...
+    scanf("%c", &anyKey);
+    scanf("%c", &anyKey);
 
     //----Checking if input file exists-------------
     if (input == NULL) {
@@ -229,6 +256,14 @@ void rotationDecryption() {
      * just inverted encryption
      */
     key = key * (-1);
+
+    printf("Input message to decrypt to input.txt\n");
+    printf("When you ready press any character and press enter: ");
+    char anyKey;
+    //i seriously have no idea why i have to put 2 of these here
+    //but that is the only way it works the way i want it to...
+    scanf("%c", &anyKey);
+    scanf("%c", &anyKey);
 
     //----Checking if input file exists-------------
     if (input == NULL) {
@@ -488,7 +523,7 @@ void substitutionDecryption() {
      * It is basically the same as encryption
      * the differences are in printf statements
      */
-    
+
     //----Setting up file IO------------------------
     FILE *input;
     FILE *output;
@@ -503,7 +538,7 @@ void substitutionDecryption() {
     char subString[arraySize]; //array used to hold substitution string
     i = 0; //counter
     int length = 0; //Used to store array size
-    int reInput = 0; //Used if subString is wrong
+    int reInput = 0; //Used to tell if subString is wrong
 
     do {
         //Zeroing the array
@@ -679,7 +714,201 @@ void substitutionDecryption() {
     fclose(substitutionString);
 }
 
-//Function written to exit the option loop
+void bruteRotationDecryption() {
+    //----Setting up file IO------------------------
+    FILE *input;
+    FILE *output;
+    FILE *dictionary;
+    input = fopen("input.txt", "r");
+    output = fopen("output.txt", "w");
+    dictionary = fopen("100.txt", "r");
+
+
+    //----Setting up variables----------------------
+    int arraySize = 1024; //Size of array
+    char charArray[arraySize]; //array used to hold a message
+    char bruteArray[arraySize]; //array used to store brute decryption
+    char dict[arraySize]; //array used to store top100 words
+    int dictWord[arraySize]; //array to store lengths of words in an dictionary file
+    int messageWord[arraySize]; //array to store lengths of words in a message file
+    int length = 0;
+    i = 0; //counter
+
+    //Zeroing all the arrays
+    for (i = 0; i <= arraySize; i++) {
+        charArray[i] = 0;
+        bruteArray[i] = 0;
+        dict[i] = 0;
+        dictWord[i] = 0;
+    }
+
+    //----Checking if dictionary file exists--------
+    if (dictionary == NULL) {
+        printf("Error Reading Dictionary File\n");
+        exit(0);
+    }
+
+    //----Checking if input file exists-------------
+    if (input == NULL) {
+        printf("Error Reading Input File\n");
+        exit(0);
+    }
+
+
+    //----Attempting to put dictionary into array---
+    /*
+     * THIS IS THE HARD WAY USING 20K DICTIONARY
+     * The idea is to scan the dictionary file first for 2-letter words
+     * then put them in an array next to each other
+     * they wont need to be separated as they all are 2-letter words
+     * then increase to the 3-letter words and put them into a separate array
+     */
+
+    /*
+     * THIS IS THE EASY WAY USING TOP 100 WORDS
+     * scan the top 100 file and put words into
+     * an array separated by some unique character
+     * algorithm will then:
+     *      count the letters of a first word in a brute forced sentence
+     *      then start with a first word in the top 100 and count its letters
+     *          up to the unique character
+     *      if they match the algorithm will compare each letter with each other
+     *      if they match it will add up to the score of a sentence and end the search
+     *      if they dont it will skip to the next word
+     */
+
+    //----DICTIONARY STUFF--------------------------
+
+    //----From File to Array------------------------
+    /*
+     * I am inputting each word from 100.txt file into an array
+     * separating them with a space
+     */
+
+    // inputting every character from file into an array
+    for (i = 0; i < arraySize; i++) {
+        fscanf(dictionary, "%1c", &dict[i]);
+    }
+
+    //----Making every character upper case---------
+    for (i = 0; i < arraySize; i++) {
+        dict[i] = toupper(dict[i]);
+    }
+
+    //Counting the lengths of a word in a top100 dictionary
+    int wordPlace = 0;
+    length = 0;
+    for (i = 0; i < arraySize; i++) {
+        if (dict[i] >= 65 && dict[i] <= 95) {
+            length++;
+        }
+        else if (dict[i] == 32) {
+            //Putting lengths into an array to access later
+            messageWord[wordPlace] = length;
+            wordPlace++;
+            length = 0;
+        }
+    }
+
+    //----From file to array------------------------
+    /*
+    * Im inputting character by character symbols
+    * from input.txt file into an array of chars
+    * charArray
+    */
+    for (i = 0; i < arraySize; i++) {
+        fscanf(input, "%1c", &charArray[i]);
+    }
+
+    //----Making every character upper case---------
+    for (i = 0; i < arraySize; i++) {
+        charArray[i] = toupper(charArray[i]);
+    }
+
+    //----Counting characters in a string-----------
+    for (length = 0; charArray[length] != '\0'; length++) {}
+
+
+    //----Counting word lengths in a message--------
+    wordPlace = 0;
+    for (i = 0; i < arraySize; i++) {
+        if (charArray[i] >= 0 && charArray[i] <= 127) {
+            if (charArray[i] >= 65 && charArray[i] <= 90) {
+                length++;
+            }
+            //We are checking with this if there is a letter in a "future"
+            //if there is no letter then we shouldn't start counting lengths of words in a message
+            else if (charArray[i + 1] >= 65 && charArray[i + 1] <= 90) {}
+            else {
+                messageWord[wordPlace] = length;
+                wordPlace++;
+                length = 0;
+            }
+        }
+    }
+
+
+    /*
+    for (i = 0; i <= 10; i++) {
+        printf("%d. %d\n", i + 1, messageWord[i]);
+    }
+    */
+
+    //----Bruteforce decryption---------------------
+    /*
+     * 1. Set key to 1 and increase it every loop by 1
+     * 2. Decrypt only capital letters (if statement)
+     * 3. print different options to output in that format:
+     * -----------------------------------
+     * Key: x
+     * Decrypted message:
+     * xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     * Dictionary matches: xx
+     * 4. Compare all outputs with some dictionary and maybe add
+     *    how many words match with a dictionary
+     * 5. Zero the array holding the brute forced decryption
+     */
+
+
+    //----Counting characters in a string-----------
+    for (length = 0; charArray[length] != '\0'; length++) {}
+
+    //loop to try all characters (hence the 26)
+    for (i = 0; i < 26; i++) {
+        fprintf(output, "----------------------------\n");
+        fprintf(output, "Key: %d\n", i);
+        fprintf(output, "Brutforce-decrypted message:\n");
+
+        for (int counter = 0; counter <= length; counter++) {
+            //ignoring all other garbage that may be there
+            if (charArray[counter] >= 0 && charArray[counter] <= 127) {
+
+                //Increasing array (that stores an encrypted message)
+                //by 1 every loop
+                bruteArray[counter] = charArray[counter] + i;
+
+                //Decrypting only capital letters
+                if (charArray[counter] >= 65 && charArray[counter] <= 90) {
+
+                    //Letters may go over 90 so we decrease
+                    //them by 26 to again become letters
+                    if (bruteArray[counter] > 90) {
+                        bruteArray[counter] = bruteArray[counter] - 26;
+                        fprintf(output, "%c", bruteArray[counter]);
+                    } else {
+                        fprintf(output, "%c", bruteArray[counter]);
+                    }
+                }
+                else {
+                    fprintf(output, "%c", charArray[counter]);
+                }
+            }
+        }
+        fprintf(output, "\n");
+    }
+
+}
+
 int exitLoop() {
     printf("\n--------------------\n");
     printf("Do you wish to exit?\n");
