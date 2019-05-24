@@ -1,4 +1,4 @@
-# project
+# Cypher
 A tool used to encrypt or decrypt messages
 
 This tool can be used to:
